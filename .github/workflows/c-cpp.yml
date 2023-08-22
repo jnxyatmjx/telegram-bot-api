@@ -48,8 +48,8 @@ jobs:
         rm -rf build
         mkdir build
         cd build
-        CXXFLAGS="-stdlib=libc++" CC="/usr/bin/clang-10 CXX=/usr/bin/clang++-10" cmake -DCMAKE_BUILD_TYPE=Release ../ 
-        make -j$(nproc) 
+        cmake -DCMAKE_BUILD_TYPE=Release ../
+        cmake --build -j$(nproc) ./
     
     - name: tar files
       run: |
