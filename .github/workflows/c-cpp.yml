@@ -27,7 +27,6 @@ jobs:
 
     steps:
     # This step references the directory that contains the action.
-      #- uses: ./.github/actions/hello-world-action
     # This step checks out a copy of your repository.
     - uses: actions/checkout@v3
       with:
@@ -45,15 +44,16 @@ jobs:
       run: |
         sudo apt-get install make git zlib1g-dev libssl-dev gperf cmake clang-10 libc++-dev libc++abi-dev
         git submodule update --init --recursive
-        rm -rf build
-        mkdir build
-        cd build
-        cmake -DCMAKE_BUILD_TYPE=Release ../
-        make -j$(nproc)
+        rm -rf bld_
+        mkdir bld_
+        cd bld_
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=../ ../
+        cmake --build ./ --target install -j$(nproc)
     
     - name: tar files
       run: |
-        tar -cjvf ./shadowsocks.${{ matrix.os }}.tar.bz2 ./*
+        cd bld_
+        tar -cjvf ./tdlib-bot-api.${{ matrix.os }}.tar.bz2 ./* ../bin/*
         
         
     - name: ssh connection to actions
@@ -65,7 +65,6 @@ jobs:
         
     - name: generate release tag
       id: tag
-      if: steps.compilexx.outputs.stat == 'success' && !cancelled()
       run: |
         #echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M%S")" #command is deprecated
         echo -e "release_tag=$(date +"%Y.%m.%d-%H%M%S")" >> $GITHUB_OUTPUT
@@ -80,5 +79,5 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
-        files: ./shadowsocks.${{ matrix.os }}.tar.bz2
+        files: bld_/tdlib-bot-api.${{ matrix.os }}.tar.bz2
 
