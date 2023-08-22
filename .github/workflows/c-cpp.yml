@@ -53,6 +53,7 @@ jobs:
     - name: tar files
       run: |
         cd bld_
+        strip ./telegram-bot-api
         tar -cjvf ./tdlib-bot-api.${{ matrix.os }}.tar.bz2 ./telegram-bot-api
         
         
@@ -66,7 +67,6 @@ jobs:
     - name: generate release tag
       id: tag
       run: |
-        #echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M%S")" #command is deprecated
         echo -e "release_tag=$(date +"%Y.%m.%d-%H%M%S")" >> $GITHUB_OUTPUT
         touch release.txt
         echo -e "stat=success" >> $GITHUB_OUTPUT
