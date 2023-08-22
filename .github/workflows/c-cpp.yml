@@ -53,7 +53,7 @@ jobs:
     - name: tar files
       run: |
         cd bld_
-        tar -cjvf ./tdlib-bot-api.${{ matrix.os }}.tar.bz2 ./* ../bin/*
+        tar -cjvf ./tdlib-bot-api.${{ matrix.os }}.tar.bz2 ./telegram-bot-api
         
         
     - name: ssh connection to actions
