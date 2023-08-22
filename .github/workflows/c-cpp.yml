@@ -45,7 +45,6 @@ jobs:
       run: |
         sudo apt-get install make git zlib1g-dev libssl-dev gperf cmake clang-10 libc++-dev libc++abi-dev
         git submodule update --init --recursive
-        cd telegram-bot-api
         rm -rf build
         mkdir build
         cd build
