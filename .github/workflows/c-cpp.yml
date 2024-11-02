@@ -43,7 +43,7 @@ jobs:
     - name: compile
       id: compsll
       run: |
-        sudo apt-get install make git zlib1g-dev libssl-dev gperf cmake clang-10 libc++-dev libc++abi-dev
+        sudo apt-get install make git zlib1g-dev libssl-dev gperf cmake clang libc++-dev libc++abi-dev
         git submodule update --init --recursive
         rm -rf bld_
         mkdir bld_
