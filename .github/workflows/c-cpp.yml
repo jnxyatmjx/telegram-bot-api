@@ -56,9 +56,8 @@ jobs:
       id: tarxx
       if: steps.compsll.outputs.stat == 'success'
       run: |
-        cd bld_
-        strip ./telegram-bot-api
-        tar -cjvf ./tdlib-bot-api.${{ matrix.os }}.tar.bz2 ./telegram-bot-api
+        strip bld_/telegram-bot-api
+        tar -cjvf bld_/tdlib-bot-api.${{ matrix.os }}.tar.bz2 bld_/telegram-bot-api
         echo "stat=oxk" >> $GITHUB_OUTPUT
 
     - name: upload file & directory
@@ -66,7 +65,7 @@ jobs:
       if: steps.tarxx.outputs.stat == 'oxk'
       with:
         name: ${{ matrix.os }}
-        path: ./tdlib-bot-api.${{ matrix.os }}.tar.bz2
+        path: bld_/tdlib-bot-api.${{ matrix.os }}.tar.bz2
 
 ########################################Merge all workflows################################################
   mergeall:
