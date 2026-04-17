@@ -112,6 +112,7 @@ class Client final : public WebhookActor::Callback {
   class JsonLinkPreviewOptions;
   class JsonAnimation;
   class JsonAudio;
+  class JsonAudios;
   class JsonDocument;
   class JsonPhotoSize;
   class JsonPhoto;
@@ -120,6 +121,7 @@ class Client final : public WebhookActor::Callback {
   class JsonMaskPosition;
   class JsonSticker;
   class JsonStickers;
+  class JsonVideoQuality;
   class JsonVideo;
   class JsonVideoNote;
   class JsonVoiceNote;
@@ -134,6 +136,8 @@ class Client final : public WebhookActor::Callback {
   class JsonPollOption;
   class JsonPoll;
   class JsonPollAnswer;
+  class JsonPollOptionAdded;
+  class JsonPollOptionDeleted;
   class JsonChecklistTask;
   class JsonChecklist;
   class JsonChecklistTasksDone;
@@ -180,6 +184,8 @@ class Client final : public WebhookActor::Callback {
   class JsonChatBoostUpdated;
   class JsonChatBoostRemoved;
   class JsonChatBoosts;
+  class JsonChatOwnerChanged;
+  class JsonChatOwnerLeft;
   class JsonForumTopicCreated;
   class JsonForumTopicEdited;
   class JsonForumTopicInfo;
@@ -223,6 +229,8 @@ class Client final : public WebhookActor::Callback {
   class JsonSharedUser;
   class JsonUsersShared;
   class JsonChatShared;
+  class JsonManagedBotCreated;
+  class JsonManagedBotUpdated;
   class JsonGiveawayCreated;
   class JsonGiveaway;
   class JsonGiveawayWinners;
@@ -243,12 +251,14 @@ class Client final : public WebhookActor::Callback {
   class JsonStickerSet;
   class JsonSentWebAppMessage;
   class JsonPreparedInlineMessageId;
+  class JsonPreparedKeyboardButton;
   class JsonCustomJson;
 
   class TdOnOkCallback;
   class TdOnAuthorizationCallback;
   class TdOnInitCallback;
   class TdOnGetUserProfilePhotosCallback;
+  class TdOnGetUserProfileAudiosCallback;
   class TdOnSendMessageCallback;
   class TdOnReturnBusinessMessageCallback;
   class TdOnSendMessageAlbumCallback;
@@ -286,6 +296,7 @@ class Client final : public WebhookActor::Callback {
   class TdOnGetUserChatBoostsCallback;
   class TdOnGetGiftsCallback;
   class TdOnCreateInvoiceLinkCallback;
+  class TdOnGetBotTokenCallback;
   class TdOnUpgradeGiftCallback;
   class TdOnGetStarAmountCallback;
   class TdOnGetReceivedGiftsCallback;
@@ -296,6 +307,7 @@ class Client final : public WebhookActor::Callback {
   class TdOnGetGameHighScoresCallback;
   class TdOnAnswerWebAppQueryCallback;
   class TdOnSavePreparedInlineMessageCallback;
+  class TdOnSavePreparedKeyboardButtonCallback;
   class TdOnReturnFileCallback;
   class TdOnReturnStickerSetCallback;
   class TdOnGetStickerSetPromiseCallback;
@@ -335,6 +347,7 @@ class Client final : public WebhookActor::Callback {
     bool allow_sending_without_reply = false;
     object_ptr<td_api::inputTextQuote> quote;
     int32 checklist_task_id = 0;
+    td::string poll_option_id;
   };
 
   struct CheckedReplyParameters {
@@ -342,6 +355,7 @@ class Client final : public WebhookActor::Callback {
     int64 reply_to_message_id = 0;
     object_ptr<td_api::inputTextQuote> quote;
     int32 checklist_task_id = 0;
+    td::string poll_option_id;
   };
 
   struct UserInfo;
@@ -483,7 +497,14 @@ class Client final : public WebhookActor::Callback {
 
   static td::Result<InputReplyParameters> get_reply_parameters(td::JsonValue &&value);
 
+  static td::Result<object_ptr<td_api::ButtonStyle>> get_button_style(td::Result<td::string> r_style);
+
+  static td::Result<object_ptr<td_api::KeyboardButtonType>> get_keyboard_button_type(td::JsonObject &object);
+
   static td::Result<object_ptr<td_api::keyboardButton>> get_keyboard_button(td::JsonValue &button);
+
+  static td::Result<object_ptr<td_api::InlineKeyboardButtonType>> get_inline_keyboard_button_type(
+      td::JsonObject &object, BotUserIds &bot_user_ids);
 
   static td::Result<object_ptr<td_api::inlineKeyboardButton>> get_inline_keyboard_button(td::JsonValue &button,
                                                                                          BotUserIds &bot_user_ids);
@@ -670,7 +691,7 @@ class Client final : public WebhookActor::Callback {
       bool disable_notification, bool protect_content, bool allow_paid_broadcast, int64 effect_id,
       object_ptr<td_api::inputSuggestedPostInfo> &&input_suggested_post_info);
 
-  static td::Result<td::vector<object_ptr<td_api::formattedText>>> get_poll_options(const Query *query);
+  static td::Result<td::vector<object_ptr<td_api::inputPollOption>>> get_input_poll_options(const Query *query);
 
   static td::Result<object_ptr<td_api::ReactionType>> get_reaction_type(td::JsonValue &&value);
 
@@ -740,6 +761,8 @@ class Client final : public WebhookActor::Callback {
   td::Status process_set_my_default_administrator_rights_query(PromisedQueryPtr &query);
   td::Status process_get_my_name_query(PromisedQueryPtr &query);
   td::Status process_set_my_name_query(PromisedQueryPtr &query);
+  td::Status process_set_my_profile_photo_query(PromisedQueryPtr &query);
+  td::Status process_remove_my_profile_photo_query(PromisedQueryPtr &query);
   td::Status process_get_my_description_query(PromisedQueryPtr &query);
   td::Status process_set_my_description_query(PromisedQueryPtr &query);
   td::Status process_get_my_short_description_query(PromisedQueryPtr &query);
@@ -747,6 +770,7 @@ class Client final : public WebhookActor::Callback {
   td::Status process_get_chat_menu_button_query(PromisedQueryPtr &query);
   td::Status process_set_chat_menu_button_query(PromisedQueryPtr &query);
   td::Status process_get_user_profile_photos_query(PromisedQueryPtr &query);
+  td::Status process_get_user_profile_audios_query(PromisedQueryPtr &query);
   td::Status process_send_message_query(PromisedQueryPtr &query);
   td::Status process_send_animation_query(PromisedQueryPtr &query);
   td::Status process_send_audio_query(PromisedQueryPtr &query);
@@ -794,6 +818,8 @@ class Client final : public WebhookActor::Callback {
   td::Status process_get_available_gifts_query(PromisedQueryPtr &query);
   td::Status process_send_gift_query(PromisedQueryPtr &query);
   td::Status process_gift_premium_subscription_query(PromisedQueryPtr &query);
+  td::Status process_get_managed_bot_token_query(PromisedQueryPtr &query);
+  td::Status process_replace_managed_bot_token_query(PromisedQueryPtr &query);
   td::Status process_verify_user_query(PromisedQueryPtr &query);
   td::Status process_verify_chat_query(PromisedQueryPtr &query);
   td::Status process_remove_user_verification_query(PromisedQueryPtr &query);
@@ -803,6 +829,7 @@ class Client final : public WebhookActor::Callback {
   td::Status process_answer_web_app_query_query(PromisedQueryPtr &query);
   td::Status process_answer_inline_query_query(PromisedQueryPtr &query);
   td::Status process_save_prepared_inline_message_query(PromisedQueryPtr &query);
+  td::Status process_save_prepared_keyboard_button_query(PromisedQueryPtr &query);
   td::Status process_answer_callback_query_query(PromisedQueryPtr &query);
   td::Status process_answer_shipping_query_query(PromisedQueryPtr &query);
   td::Status process_answer_pre_checkout_query_query(PromisedQueryPtr &query);
@@ -862,6 +889,7 @@ class Client final : public WebhookActor::Callback {
   td::Status process_leave_chat_query(PromisedQueryPtr &query);
   td::Status process_promote_chat_member_query(PromisedQueryPtr &query);
   td::Status process_set_chat_administrator_custom_title_query(PromisedQueryPtr &query);
+  td::Status process_set_chat_member_tag_query(PromisedQueryPtr &query);
   td::Status process_ban_chat_member_query(PromisedQueryPtr &query);
   td::Status process_restrict_chat_member_query(PromisedQueryPtr &query);
   td::Status process_unban_chat_member_query(PromisedQueryPtr &query);
@@ -987,6 +1015,7 @@ class Client final : public WebhookActor::Callback {
     object_ptr<td_api::businessInfo> business_info;
     object_ptr<td_api::acceptedGiftTypes> accepted_gift_types;
     object_ptr<td_api::userRating> rating;
+    object_ptr<td_api::audio> first_profile_audio;
     int64 personal_chat_id = 0;
     int64 paid_message_star_count = 0;
 
@@ -1001,6 +1030,8 @@ class Client final : public WebhookActor::Callback {
     bool is_premium = false;
     bool added_to_attachment_menu = false;
     bool has_topics = false;
+    bool allows_users_to_create_topics = false;
+    bool can_manage_bots = false;
   };
   static void add_user(UserInfo *user_info, object_ptr<td_api::user> &&user);
   UserInfo *add_user_info(int64 user_id);
@@ -1100,6 +1131,7 @@ class Client final : public WebhookActor::Callback {
     int64 paid_message_star_count = 0;
     object_ptr<td_api::MessageOrigin> forward_origin;
     td::string author_signature;
+    td::string sender_tag;
     td::unique_ptr<MessageInfo> business_reply_to_message;
     object_ptr<td_api::messageReplyToMessage> reply_to_message;
     object_ptr<td_api::messageReplyToStory> reply_to_story;
@@ -1186,6 +1218,8 @@ class Client final : public WebhookActor::Callback {
                                               const td_api::chatAdministratorRights *rights, ChatType chat_type);
 
   static void json_store_permissions(td::JsonObjectScope &object, const td_api::chatPermissions *permissions);
+
+  static void json_store_rarity(td::JsonObjectScope &object, const td_api::UpgradedGiftAttributeRarity *rarity);
 
   td::unique_ptr<MessageInfo> delete_message(int64 chat_id, int64 message_id, bool only_from_cache);
 
@@ -1286,6 +1320,8 @@ class Client final : public WebhookActor::Callback {
 
   void add_update_purchased_paid_media(object_ptr<td_api::updatePaidMediaPurchased> &&query);
 
+  void add_update_managed_bot(object_ptr<td_api::updateManagedBot> &&query);
+
   void add_new_custom_event(object_ptr<td_api::updateNewCustomEvent> &&event);
 
   void add_new_custom_query(object_ptr<td_api::updateNewCustomQuery> &&query);
@@ -1331,6 +1367,7 @@ class Client final : public WebhookActor::Callback {
     EditedBusinessMessage,
     BusinessMessagesDeleted,
     PurchasedPaidMedia,
+    ManagedBot,
     Size
   };
 
